@@ -12,4 +12,4 @@ class SummarizerRequest(BaseModel):
 
 @app.post("/summarize")
 async def summarizer(request: SummarizerRequest):
-    return {"summary": f"Placeholder summary for text: {request.txt} using model: {request.model}"}
+    return {"summary": f"Placeholder summary for text: {request.text} using model: {request.model}"}

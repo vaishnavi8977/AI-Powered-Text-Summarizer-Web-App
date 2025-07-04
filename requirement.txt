@@ -1,0 +1,10 @@
+langchain==0.2.16
+llama-index==0.11.11
+transformers==4.44.2
+fastapi==0.115.0
+uvicorn==0.30.6
+streamlit==1.39.0
+requests==2.32.3
+huggingface_hub==0.25.1
+python-dotenv==1.0.1
+black==24.8.0
