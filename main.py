@@ -36,7 +36,7 @@ async def summarizer():
         there willing to move from of their fantastical farms, to crouching in the dirt, planting seedlings, plotting their acres, going to 
         market, oh, and of course, pulling those weeds
         """
-    result, response = await creator.createblog_post(input_text)
+    result = await creator.createblog_post(input_text)
     if not result:
         return JSONResponse(status_code=500, content={"message": "Something went wrong"})
-    return response
+    return JSONResponse(content=result)
