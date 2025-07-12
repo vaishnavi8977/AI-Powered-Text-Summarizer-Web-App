@@ -1,6 +1,6 @@
 from langchain.output_parsers import ResponseSchema, StructuredOutputParser
 from transformers import pipeline
-from langchain_community.llms import HuggingFacePipeline
+from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from dotenv import load_dotenv
@@ -29,7 +29,7 @@ async def createblog_post(text):
 
     # Prompt
     template = PromptTemplate(
-        input_variables=["text"],
+        input_variables=["userText"],
         template="""
     You are a creative blog writer. Given the passage below, write a blog post and return a JSON with:
     - "blog_title": an SEO-friendly title
@@ -41,7 +41,7 @@ async def createblog_post(text):
     {format_instructions}
 
     Passage:
-    {text}
+    {userText}
     """.strip(),
         partial_variables={"format_instructions": format_instructions}
     )
@@ -55,14 +55,16 @@ async def createblog_post(text):
 
     # Full Chain
     chain = template | llm | output_parser
-
+    print("hello ---->")
     # Invoke chain
     try:
         result = chain.invoke({
-            "text": "Facebook is a social media platform that connects people globally."
+            "userText": "Facebook is a social media platform that connects people globally."
         })
+        print("hello ----> 12345")
         print("Blog Title:", result["blog_title"])
         print("Blog Content:", result["post_content"])
         print("Tags:", result["tags"])
     except Exception as e:
         print("Error:", str(e))
+    return result
