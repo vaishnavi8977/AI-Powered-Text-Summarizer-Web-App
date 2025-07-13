@@ -55,6 +55,45 @@ huggingface-cli login
 - **Collection Name**: `posts`
 - **Default URI**: `mongodb://localhost:27017`
 
+## 🔑 Setting Up OpenAI API
+
+The project uses OpenAI's GPT-4o model for blog generation, which requires an API key. Follow these steps to set up the OpenAI API:
+
+1. **Create an OpenAI Account**:
+   - Visit [https://platform.openai.com/signup](https://platform.openai.com/signup).
+   - Sign up with your email or log in if you already have an account.
+
+2. **Obtain an OpenAI API Key**:
+   - Navigate to the [API Keys](https://platform.openai.com/api-keys) section in your OpenAI dashboard.
+   - Click "Create API Key" and copy the generated key.
+   - **Important**: Store the key securely, as it cannot be retrieved later.
+
+3. **Configure the API Key**:
+   - Create a `.env` file in the project root directory.
+   - Add the following line to the `.env` file, replacing `your_openai_api_key` with your actual key:
+     ```bash
+     OPENAI_API_KEY=your_openai_api_key
+     ```
+   - The project uses the `python-dotenv` library to load the API key. The `load_dotenv()` function in the code automatically reads the `.env` file:
+     ```python
+     from dotenv import load_dotenv
+     load_dotenv()  # Loads OPENAI_API_KEY from .env
+     ```
+
+4. **Verify Integration**:
+   - The OpenAI API key is used by the `ChatOpenAI` model in the blog generation function:
+     ```python
+     from langchain_community.chat_models import ChatOpenAI
+     llm = ChatOpenAI(
+         model="gpt-4o",
+         temperature=0.7,
+         max_tokens=1000
+     )
+     ```
+   - Ensure the `.env` file is in the project root and not committed to version control (e.g., add `.env` to `.gitignore`).
+
+
+
 ## 🚀 Running the App
 
 1. Start the FastAPI server:
@@ -122,12 +161,25 @@ huggingface-cli login
 ## ⚙️ Challenges and Solutions
 
 ### Challenge 1: Model Selection
-- **Issue**: Initially used Hugging Face models (e.g., `flan-t5`, `bart-large-cnn`), which were slow or failed in CPU-only environments due to their size and resource demands.
-- **Solution**: Switched to OpenAI’s GPT-4o model (cloud-based):
-  - No local model download or GPU required.
-  - Fast, high-quality, instruction-following output.
-  - Produces structured JSON, compatible with LangChain parsing.
-  - Cost-effective (~$0.0003–0.0009 per 1K tokens).
+- **Issue**: Initially, Hugging Face models like `flan-t5` and `bart-large-cnn` were used for text summarization and blog generation. These models were unsuitable for the project due to:
+  - **CPU Limitations**: Hugging Face models are large (4–12 GB of RAM) and computationally intensive, leading to slow inference (minutes per request) or crashes on CPU-only systems. The project environment lacked GPU support, making these models impractical.
+  - **NVIDIA GPU Issues**: An attempt to use an NVIDIA GPU with the CUDA Toolkit was made, but it failed due to system-specific compatibility issues, such as unsupported GPU architecture, driver mismatches, or insufficient CUDA memory.
+  - **Model Size and Latency**: Even with GPU support, Hugging Face models required local model downloads and significant memory, increasing deployment complexity.
+- **Solution**: Switched to OpenAI’s GPT-4o model (cloud-based), integrated via the `ChatOpenAI` class in LangChain:
+  ```python
+  from langchain_community.chat_models import ChatOpenAI
+  llm = ChatOpenAI(
+      model="gpt-4o",
+      temperature=0.7,
+      max_tokens=1000
+  )
+  ```
+  - **Benefits**:
+    - **No Local Compute Required**: GPT-4o runs on OpenAI’s cloud, eliminating the need for local GPU or high-memory CPU.
+    - **Fast Inference**: Provides near-instantaneous responses, even for complex blog generation tasks.
+    - **High-Quality Output**: Delivers instruction-following, structured JSON output compatible with LangChain’s `StructuredOutputParser` for reliable parsing.
+    - **Cost-Effective**: Affordable for students (~$0.0003–0.0009 per 1K tokens), ideal for lightweight, scalable deployments.
+    - **Ease of Integration**: Requires only an API key, loaded via `dotenv`, simplifying setup compared to managing local model weights.
 
 ### Challenge 2: Validating User Input
 - **Issue**: Invalid inputs (e.g., numbers, lists, or non-strings) could break blog generation or produce poor output.

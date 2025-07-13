@@ -55,13 +55,11 @@ async def createblog_post(text):
 
     # Full Chain
     chain = template | llm | output_parser
-    print("hello ---->")
     # Invoke chain
     try:
         result = chain.invoke({
             "userText": text
         })
-        print("hello ----> 12345")
         print("Blog Title:", result["blog_title"])
         print("Blog Content:", result["post_content"])
         print("Tags:", result["tags"])
