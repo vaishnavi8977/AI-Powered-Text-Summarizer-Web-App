@@ -48,6 +48,10 @@ response:
   "summary": "Placeholder summary for text: Hello how are you using model: LangChain"
 }
 
+
+Add db driver:
+I choose async MongoDB driver for Python FastAPI
+
 # Challenge1 Model Selection :
 Originally used Hugging Face models like flan-t5 and bart-large-cnn. These models are large and require GPU for efficient execution.
 
