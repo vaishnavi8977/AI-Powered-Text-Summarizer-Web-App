@@ -59,7 +59,7 @@ async def createblog_post(text):
     # Invoke chain
     try:
         result = chain.invoke({
-            "userText": "Facebook is a social media platform that connects people globally."
+            "userText": text
         })
         print("hello ----> 12345")
         print("Blog Title:", result["blog_title"])
