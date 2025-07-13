@@ -2,9 +2,10 @@ from pydantic import BaseModel, Field, field_validator
 from typing import List, Annotated
 
 class BlogPost(BaseModel):
-    title: str
+    blog_title: str
     tags: List[str]
-    content: str
+    post_content: str
+    print("inside blog post")
 
 class SummarizerRequest(BaseModel):
     content: str
