@@ -13,6 +13,7 @@ class AsyncDBConnector:
         info = await self.client.server_info()
         return info
 
+    # Asynchrously add blog post to the db
     async def add_post(self, post):
         post_result = post.model_dump()
         post_result["uuid"] = str(uuid4())
@@ -24,5 +25,15 @@ class AsyncDBConnector:
             return True
         else:
             return False
+
+    # Asynchrously fetch all post and store in list
+    async def get_blog_posts(self):
+        posts = []
+
+        async for post in self.db.find():
+            post.pop("_id", None)
+            post["created_ts"] = post["created_ts"].isoformat()
+            posts.append(post)
+        return posts
 
 db = AsyncDBConnector()

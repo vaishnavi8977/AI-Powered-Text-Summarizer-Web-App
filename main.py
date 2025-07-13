@@ -50,3 +50,8 @@ async def summarizer(req:SummarizerRequest):
         return JSONResponse(status_code=500, content={"message": "Could not save the blog post"})
 
     return JSONResponse(status_code=200, content=dbresult)
+
+@app.get("/blog_list")
+async def get_blog_list():
+    list_of_blogs = await db.get_blog_posts()
+    return JSONResponse(status_code=200, content={"blogs": list_of_blogs})
