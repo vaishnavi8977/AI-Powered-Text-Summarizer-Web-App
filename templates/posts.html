@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Blog Posts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2rem;
+            background-color: #f2f2f2;
+        }
+        .post {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .tags {
+            margin: 0.5rem 0;
+            color: #888;
+        }
+        .content {
+            margin-top: 1rem;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Blog Posts</h1>
+
+    {% if posts %}
+        {% for post in posts %}
+            <div class="post">
+                <div class="title">{{ post.blog_title }}</div>
+                <div class="tags">
+                    Tags:
+                    {% for tag in post.tags %}
+                        <span>#{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                <div class="content">{{ post.post_content }}</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No blog posts found.</p>
+    {% endif %}
+</body>
+</html>
