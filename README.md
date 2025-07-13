@@ -1,127 +1,176 @@
-# project: AI-Powered-Text-Summarizer-Web-App
-Author: VAISHNAVI DADE  
-DATE: 07/03/2024  
-Install libraries: langchain, llama-index, transformers, fastapi, uvicorn, streamlit (pip install)   
 
-pip install langchain  
-pip install llama-index  
-pip install "fastapi[all]"  
-pip install "transformers[torch]"  
-pip install -U langchain-community
-pip install openai langchain
+# ThoughtCraft: AI-Powered Text Summarizer Web App
 
+**Author**: Vaishnavi Dade  
+**Date**: July 3, 2024  
 
-create virtual env
+## 📘 Overview
+
+**ThoughtCraft** is a web application that transforms unstructured thoughts into clean, well-formatted blog posts using AI. Built with **FastAPI**, **LangChain**, **Jinja2 templates**, and a **MongoDB backend**, it enables users to input raw text, which is summarized, structured, and stored in a database for seamless access.
+
+## ✨ Features
+
+- **Text Summarization**: Converts raw user input into concise, structured blog posts using AI models (e.g., GPT-4o).
+- **Input Validation**: Ensures meaningful input (5–300 words) using Pydantic for robust error handling.
+- **Asynchronous Backend**: Utilizes FastAPI and `motor` for non-blocking operations and efficient database interactions.
+- **Dynamic Rendering**: Displays input forms and generated blog posts on the same page using Jinja2 templates.
+- **MongoDB Storage**: Saves generated blog posts in a MongoDB database for persistence.
+- **API Documentation**: Auto-generated Swagger UI at `/docs` for easy API exploration.
+
+## 🛠️ Installation
+
+### Prerequisites
+- Python 3.8+
+- MongoDB (running locally on `mongodb://localhost:27017`)
+- Optional: NVIDIA CUDA Toolkit for GPU support (if using Hugging Face models)
+
+### Step 1: Create a Virtual Environment
+```bash
 python -m venv venv
-venv\Scripts\activate
-pip install -r requirement.txt
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
+### Step 2: Install Dependencies
+Install the required Python packages:
+```bash
+pip install langchain llama-index "fastapi[all]" "transformers[torch]" langchain-community openai motor uvicorn
 pip install -U "huggingface_hub[cli]"
-login to huggingface cli using token command is here 
+```
+
+Save dependencies to a `requirements.txt` file:
+```bash
+pip freeze > requirements.txt
+pip install -r requirements.txt
+```
+
+### Step 3: Hugging Face CLI Login
+For Hugging Face model access, log in using your Hugging Face token:
+```bash
 huggingface-cli login
+```
 
+### Step 4: MongoDB Setup
+- Ensure MongoDB is running locally.
+- **Database Name**: `blog`
+- **Collection Name**: `posts`
+- **Default URI**: `mongodb://localhost:27017`
 
-Run model on GPU : install https://developer.nvidia.com/cuda-toolkit
+## 🚀 Running the App
 
+1. Start the FastAPI server:
+   ```bash
+   uvicorn main:app --reload
+   ```
+2. Access the app at: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+3. Explore API documentation at: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
-to run the app http://127.0.0.1:8000/
+## 📝 Usage
 
-URL to check app is working local 
-http://127.0.0.1:8000/
+### API Endpoints
 
-Swagger UI
-http://127.0.0.1:8000/docs 
+#### 1. Summarize Text
+- **URL**: `/summarize`
+- **Method**: POST
+- **Request Body**:
+  ```json
+  {
+    "text": "Hello Framework",
+    "model": "LangChain"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "summary": "Placeholder summary for text: Hello how are you using model: LangChain"
+  }
+  ```
 
+#### 2. Blog Generation
+- **URL**: `/submit_thought`
+- **Method**: POST
+- **Input**: Form data with a `thought` field (5–300 words).
+- **Process**:
+  - Validates input length using Pydantic’s `field_validator`.
+  - Processes input through the GPT-4o model.
+  - Renders the generated blog post on the same page using Jinja2.
+  - Saves the result in MongoDB.
 
-Step1:
-Using FastAPi set the POST request /summarize and import .env
-verify POST request by passing sample Json
-http://127.0.0.1:8000/summarize
-request:
-{
-  "text": "Hello Framework",
-  "model": "LangChain"
-}
+#### Example Input
+- **Thought**: "The golden hour casts a warm glow over the hills, inspiring thoughts of peace and reflection."
+- **Rendered Blog Output**:
+  ```markdown
+  **Title**: The Magic of Golden Hour Reflections  
+  **Tags**: #Poetry, #Sunset, #EveningThoughts  
+  **Post**: A beautifully written blog post based on your input.
+  ```
 
-response: 
-{
-  "summary": "Placeholder summary for text: Hello how are you using model: LangChain"
-}
+### Templates
+- **create_post.html**: Displays a form for submitting thoughts and renders the generated blog post below it.
 
+## 🛠️ Development Notes
 
-Add db driver:
-I choose async MongoDB driver for Python FastAPI
+- **Backend**: Fully asynchronous using `async/await` for non-blocking operations.
+- **Error Handling**:
+  - Model errors (e.g., API failures).
+  - Validation errors (e.g., invalid input length).
+  - Database write failures.
+- **FastAPI Features**:
+  - Routing with `@app.get` and `@app.post`.
+  - Pydantic `BaseModel` for JSON input/output validation.
+  - Auto-generated Swagger UI at `/docs`.
 
-# Challenge1 Model Selection :
-Originally used Hugging Face models like flan-t5 and bart-large-cnn. These models are large and require GPU for efficient execution.
+## ⚙️ Challenges and Solutions
 
-Project environment is CPU-only; GPU not available. Hugging Face models were slow or failed in CPU-only setup.
+### Challenge 1: Model Selection
+- **Issue**: Initially used Hugging Face models (e.g., `flan-t5`, `bart-large-cnn`), which were slow or failed in CPU-only environments due to their size and resource demands.
+- **Solution**: Switched to OpenAI’s GPT-4o model (cloud-based):
+  - No local model download or GPU required.
+  - Fast, high-quality, instruction-following output.
+  - Produces structured JSON, compatible with LangChain parsing.
+  - Cost-effective (~$0.0003–0.0009 per 1K tokens).
 
-Switched to OpenAI’s gpt-4o model (API-based).
+### Challenge 2: Validating User Input
+- **Issue**: Invalid inputs (e.g., numbers, lists, or non-strings) could break blog generation or produce poor output.
+- **Solution**: Implemented Pydantic for strict input validation:
+  - Ensures only valid string inputs are accepted.
+  - Raises clear errors for invalid inputs (e.g., integers, empty values).
+  - Enhances API robustness and user experience.
 
-gpt-4o runs via cloud — no local model download or GPU needed. Provides fast, high-quality, instruction-following output. Produces clean structured JSON, useful with LangChain parsing. More reliable than small Hugging Face models for blog generation.
-
-Cost-effective for students (approx. $0.0003–0.0009 per 1K tokens). Ideal for lightweight, scalable, and low-cost deployments.
-
-
-# Challenge 2 Validating User Input 
-The project requires the user to input a string user need type his ideas to create structured and meaningfull vlog.
-The input is used to generate a structured and meaningful blog post via AI.
-Invalid input like numbers, lists, or non-string types can break the generation or result in poor output.
-To handle this, we use Pydantic for strict input validation.
-
-Pydantic ensures that:
-Only valid string inputs are accepted.
-Any invalid input (like integers or empty values) raises a clear error.
-This protects the AI chain from processing faulty data.
-Adds robustness to the API and improves the overall user experience.
-Makes the application more reliable and production-ready. 
-
-
-
-# FastAPI Notes
-- Routing: `@app.get`, `@app.post` define endpoints.
-- Async: `async def` for non-blocking operations.
-- Pydantic: `BaseModel` validates JSON input/output.
-- Swagger UI: Auto-generated at `/docs`.
-
-# Challenge 3: Input Length Validation & Error Handling
-The user must provide blog input text between 5 to 300 words.
-
-This ensures the content is meaningful for blog generation while preventing overly short or long inputs.
-
-Validation is handled using a Pydantic model in the API layer.
-
-If the input does not meet the length requirement, the API:
-
-Rejects the request
-
-Returns a custom error message explaining the issue
-
-This prevents unnecessary model invocation and improves UX.
-
-Makes the system more resilient, controlled, and user-friendly.
-
-Easy to test by:
-
-Sending short inputs (e.g., "Hi" → should fail)
-
-Sending overly long content (>300 words → should fail)
-
-Sending valid input within range → should succeed
-{
-    "detail": [
+### Challenge 3: Input Length Validation & Error Handling
+- **Issue**: Blog input text must be 5–300 words to ensure meaningful content without overloading the system.
+- **Solution**:
+  - Used Pydantic to validate input length in the API layer.
+  - Rejects invalid requests with custom error messages:
+    ```json
+    {
+      "detail": [
         {
-            "type": "value_error",
-            "loc": [
-                "body",
-                "content"
-            ],
-            "msg": "Value error, Idea must have at least 5 words.",
-            "input": "string",
-            "ctx": {
-                "error": {}
-            }
+          "type": "value_error",
+          "loc": ["body", "content"],
+          "msg": "Value error, Idea must have at least 5 words.",
+          "input": "string",
+          "ctx": {"error": {}}
         }
-    ]
-}
+      ]
+    }
+    ```
+  - Testing:
+    - Short input (e.g., "Hi") → Fails.
+    - Overly long input (>300 words) → Fails.
+    - Valid input → Succeeds.
+
+## 🤝 Contributing
+
+Contributions are welcome! To contribute:
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature-name`).
+3. Commit your changes (`git commit -m "Add feature"`).
+4. Push to the branch (`git push origin feature-name`).
+5. Open a pull request.
+
+Please ensure your code follows the project’s style guidelines and includes tests where applicable.
+
+## 📬 Feedback
+
+Feel free to fork this repository or reach out with suggestions to extend the project. For issues or feature requests, open an issue on the repository.
+
